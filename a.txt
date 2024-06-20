@@ -1,0 +1,190 @@
+package com.patrones.software.estructurales.adapter;
+
+public interface IConexionBD {
+
+	// crear una conexion a la BD
+	public void conexion();
+
+	// ejecutar una consulta en la BD
+	public String ejecutarConsulta();
+
+}
+
+package com.patrones.software.estructurales.adapter;
+
+public interface IConexionNoSQL {
+
+	public void conexion();
+
+	public String ejecutarConsultaNosql();
+}
+
+package com.patrones.software.estructurales.adapter;
+
+public class ConexionMySQL implements IConexionBD{
+
+	@Override
+	public void conexion() {
+		System.out.println("Conexion a MYSQL");
+		
+	}
+
+	@Override
+	public String ejecutarConsulta() {
+		return "Resultado consulta";
+		
+	}
+
+}
+
+package com.patrones.software.estructurales.adapter;
+
+public class ConexionMongoDB implements IConexionNoSQL {
+
+	@Override
+	public void conexion() {
+
+		System.out.println("Conexion Mongo DB");
+
+	}
+
+	@Override
+	public String ejecutarConsultaNosql() {
+
+		return "Consulta NOSQL Mongo DB";
+	}
+
+}
+
+package com.patrones.software.estructurales.adapter;
+
+/*
+ * Este adaptador implementara una interfaz y en este caso 
+ * el adaptador servira como puente
+ * entre el cliente y la la interfaz de conexion NOSQL
+ * 
+ */
+
+public class AdaptadorDB implements IConexionBD{
+	
+	//paso 1.- DEFINIR SU COMPORTAMIENTO
+	private IConexionNoSQL noSQL;
+	// entonces: ENLAZANDO LAS DOS INTERFACES
+	
+
+	//ASIGNAMOS UN VALOR AL ATRIBUTO MEDIANTE EL CONSTRUCTOR
+	public AdaptadorDB(IConexionNoSQL noSQL) {
+		this.noSQL = noSQL; // YA CON UN VALOR PODEMOS MODIFICAR EL COMPORTAMIENTO 
+		
+	}
+
+	
+	
+	@Override
+	public void conexion() {
+	
+		this.noSQL.conexion();
+		
+	}
+
+	
+	@Override
+	public String ejecutarConsulta() {
+		
+		return this.noSQL.ejecutarConsultaNosql();
+	}
+
+}
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+package com.patrones.software.estructurales.adapter;
+
+public interface IConexionXML {
+    public void conexion();
+    public String obtenerDatosXML();
+}
+
+package com.patrones.software.estructurales.adapter;
+
+public interface IAnalisisJSON {
+    public void conexion();
+    public String analizarDatosJSON();
+}
+
+package com.patrones.software.estructurales.adapter;
+
+public class ConexionXML implements IConexionXML {
+
+    @Override
+    public void conexion() {
+        System.out.println("Conexión a fuente XML");
+    }
+
+    @Override
+    public String obtenerDatosXML() {
+        return "<datos><dato>Valor1</dato><dato>Valor2</dato></datos>";
+    }
+}
+
+package com.patrones.software.estructurales.adapter;
+
+public class AnalisisJSON implements IAnalisisJSON {
+
+    @Override
+    public void conexion() {
+        System.out.println("Conexión al analizador JSON");
+    }
+
+    @Override
+    public String analizarDatosJSON() {
+        return "{ \"datos\": [\"Valor1\", \"Valor2\"] }";
+    }
+}
+
+package com.patrones.software.estructurales.adapter;
+
+public class AdaptadorXMLaJSON implements IAnalisisJSON {
+
+    private IConexionXML conexionXML;
+
+    public AdaptadorXMLaJSON(IConexionXML conexionXML) {
+        this.conexionXML = conexionXML;
+    }
+
+    @Override
+    public void conexion() {
+        conexionXML.conexion();
+    }
+
+    @Override
+    public String analizarDatosJSON() {
+        String datosXML = conexionXML.obtenerDatosXML();
+        // Convertir datos XML a JSON (simplificación para el ejemplo)
+        String datosJSON = convertirXMLaJSON(datosXML);
+        return datosJSON;
+    }
+
+    private String convertirXMLaJSON(String datosXML) {
+        // Método de conversión simplificado
+        return "{ \"datos\": [\"Valor1\", \"Valor2\"] }";
+    }
+}
+
+package com.patrones.software.estructurales.adapter;
+
+public class Main {
+    public static void main(String[] args) {
+        // Conexión y obtención de datos XML
+        IConexionXML conexionXML = new ConexionXML();
+        conexionXML.conexion();
+        String datosXML = conexionXML.obtenerDatosXML();
+        System.out.println("Datos XML: " + datosXML);
+
+        // Adaptador que convierte datos XML a JSON
+        IAnalisisJSON adaptador = new AdaptadorXMLaJSON(conexionXML);
+        adaptador.conexion();
+        String datosJSON = adaptador.analizarDatosJSON();
+        System.out.println("Datos JSON: " + datosJSON);
+    }
+}
